@@ -1,0 +1,81 @@
+# 数据文件夹
+/data/
+/data/cad_json/
+/data/cad_json_repair/
+/data/cad_py/
+/data/cad_py_repair/
+/data/cad_free/
+/data/cad_free_repair/
+/data/cad_py_repair_large/
+
+# 日志文件夹
+/logging/
+*.log
+*.db
+*.csv
+
+# Python缓存文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 虚拟环境
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE配置
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# 其他不需要的文件
+*.pkl
+*.pickle
+
+.claude
+.vscode
+__pycache__
+logging
+data
+CLAUDE.md
+temp
+test_suite
