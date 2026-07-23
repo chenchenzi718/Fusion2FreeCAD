@@ -1,0 +1,57 @@
+# Data directories
+data/
+data/cad_json/
+data/cad_json_repair/
+data/cad_py/
+data/cad_py_repair/
+data/cad_free/
+data/cad_free_repair/
+
+# Logging
+logging/
+*.log
+*.csv
+
+# SQLite databases (runtime artifacts)
+*.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+.claude/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Temp
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Pickle datasets (too large for git)
+*.pkl
+*.pickle
+
+# Auxiliary materials (not part of release)
+aux_material/
