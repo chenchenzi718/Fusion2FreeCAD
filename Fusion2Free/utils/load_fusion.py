@@ -58,14 +58,15 @@ def get_fusion_sequence(fusion_json):
 
 
 if __name__ == "__main__":
-    fusion_prefix_path = "../data/cad_json/0000/"
-    json_list = []
-    for root, dirs, files in os.walk(fusion_prefix_path):
-        for file in files:
-            if file.endswith(".json"):
-                json_list.append(os.path.join(root, file))
-    for json_file in json_list:
-        fusion_path = os.path.join(json_file)
-        fusion_json = load_fusion(fusion_path)
-        op_str = get_fusion_sequence(fusion_json)
-        print(f"op_str: {op_str}")
+    from fusion2free.utils.config import INPUT_DIR
+
+    # Quick test: list operation sequences
+    test_dir = os.path.join(INPUT_DIR, "0000/")
+    if os.path.isdir(test_dir):
+        for json_file in os.listdir(test_dir):
+            if json_file.endswith(".json"):
+                fusion_json = load_fusion(os.path.join(test_dir, json_file))
+                op_str = get_fusion_sequence(fusion_json)
+                print(f"{json_file}: {op_str}")
+    else:
+        print(f"Test directory not found: {test_dir}")

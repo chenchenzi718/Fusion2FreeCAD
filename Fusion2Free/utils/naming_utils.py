@@ -77,15 +77,6 @@ class FreeCADNameEncoder:
                 if attempt > max_attempts:
                     raise Exception("Cannot generate unique encoded name.")
 
-    def decode_name_free2fusion(self, encoded_name):
-        """Look up the original name from an encoded name."""
-        self.cursor.execute(
-            "SELECT original_name FROM name_mapping WHERE encoded_name = ?",
-            (encoded_name,),
-        )
-        result = self.cursor.fetchone()
-        return result[0] if result else None
-
     def decode_name_fusion2free(self, original_name):
         """
         Look up the encoded name for an original name.

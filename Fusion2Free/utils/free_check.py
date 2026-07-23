@@ -12,6 +12,28 @@ import tempfile
 from fusion2free.utils.config import FREECAD_CMD_PATH
 
 
+def _clean_env():
+    """
+    Return a clean environment dict for FreeCADCmd subprocess.
+
+    Removes Python-related variables (PYTHONHOME, PYTHONPATH, VIRTUAL_ENV,
+    CONDA_* etc.) that confuse FreeCAD's embedded Python interpreter.
+    Keeps PATH, TEMP, TMP, and SystemRoot for normal Windows operation.
+    """
+    keep = {
+        "PATH", "TEMP", "TMP", "SYSTEMROOT", "SystemRoot",
+        "windir", "WINDIR", "COMPUTERNAME", "USERNAME",
+        "USERPROFILE", "HOMEDRIVE", "HOMEPATH",
+        "NUMBER_OF_PROCESSORS", "OS", "PROCESSOR_ARCHITECTURE",
+    }
+    # Normalize: uppercase all existing keys for matching
+    env = {}
+    for key, value in os.environ.items():
+        if key.upper() in keep:
+            env[key] = value
+    return env
+
+
 def run_freecad_modeling(data_id, py_dir, logging_dir, output_free_path):
     """
     Execute a FreeCAD Python script and save the result as .FCStd.
@@ -22,9 +44,6 @@ def run_freecad_modeling(data_id, py_dir, logging_dir, output_free_path):
         logging_dir: directory for log files
         output_free_path: directory for .FCStd output
     """
-    # --- Validation check disabled by default ---
-    return
-
     output_dir = os.path.join(output_free_path, data_id[:4])
     os.makedirs(output_dir, exist_ok=True)
 
@@ -38,27 +57,38 @@ def run_freecad_modeling(data_id, py_dir, logging_dir, output_free_path):
     if not os.path.exists(py_file_path):
         raise FileNotFoundError(f"Python file not found: {py_file_path}")
 
-    temp_script_content = f"""
-import FreeCAD as App
-import Part
-import os
+    # ------------------------------------------------------------------
+    # Wrapper script — executed inside FreeCAD's own Python interpreter.
+    # Exits with code 0 on success, non-zero on any exception.
+    # ------------------------------------------------------------------
+    temp_script_content = f'''
+import sys
 
 py_file_path = r"{py_file_path}"
-print(f"Reading Python file: {{py_file_path}}")
-with open(py_file_path, 'r', encoding='utf-8') as f:
-    for line in f:
-        line = line.strip()
-        if line:
-            exec(line)
+save_path    = r"{save_path}"
 
-doc = App.ActiveDocument
-if doc:
+try:
+    import FreeCAD as App
+
+    # Execute the generated script in an isolated namespace
+    import types
+    script_module = types.ModuleType("__freecad_script__")
+    script_module.__file__ = py_file_path
+    exec(open(py_file_path, "r", encoding="utf-8").read(),
+         script_module.__dict__)
+
+    # Save the resulting document
+    doc = App.ActiveDocument
+    if doc is None:
+        sys.exit(1)
     doc.recompute()
-    doc.saveAs(r"{save_path}")
+    doc.saveAs(save_path)
     App.closeDocument(doc.Name)
-"""
+    sys.exit(0)
 
-    print(f"Python file exists: {py_file_path}")
+except Exception:
+    sys.exit(1)
+'''
 
     temp_script_path = os.path.join(tempfile.gettempdir(), f"{data_id}_temp.py")
     with open(temp_script_path, "w", encoding="utf-8") as f:
@@ -67,27 +97,39 @@ if doc:
     cmd = [FREECAD_CMD_PATH, temp_script_path]
 
     result = subprocess.run(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        env=_clean_env(),
     )
 
+    # Clean up temp script
     try:
         os.remove(temp_script_path)
     except OSError:
         pass
 
-    if result.stderr:
+    if result.returncode != 0:
+        # Validation failed — remove the .py script
+        try:
+            os.remove(py_file_path)
+        except OSError:
+            pass
         raise Exception(
-            "Error occurred during FreeCAD modeling:\\n"
-            + result.stderr.split("\\n")[0]
+            f"FreeCADCmd exited with code {result.returncode}\\n"
+            + result.stderr[:500]
         )
 
     return f"{data_id}_free.FCStd"
 
 
 if __name__ == "__main__":
+    from fusion2free.utils.config import OUTPUT_PY_DIR, LOG_DIR, OUTPUT_FREE_DIR
+
     run_freecad_modeling(
-        "00000062",
-        "./data/cad_py_repair",
-        "./logging",
-        "./data/cad_free_repair",
+        "00000007",
+        OUTPUT_PY_DIR,
+        LOG_DIR,
+        OUTPUT_FREE_DIR,
     )

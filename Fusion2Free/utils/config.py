@@ -1,39 +1,43 @@
 """
 Configuration and constants for Fusion2Free.
 
-FreeCAD paths can be configured via environment variables or by modifying
-FREECAD_CMD_PATH directly.
+All user-facing paths and defaults are centralized here. Override any value
+via environment variable or by editing this file directly.
 """
 
 import os
 
-
 # ---------------------------------------------------------------------------
-# FreeCAD version mode
+# FreeCAD command-line path (required for validation & bbox)
 # ---------------------------------------------------------------------------
-# 0  = custom build forked from FreeCAD (the branch used in our experiments)
-# 1  = official FreeCAD 1.0 release
-FREECAD_VERSION_MODE = 0
-
-# ---------------------------------------------------------------------------
-# FreeCAD command-line path
-# ---------------------------------------------------------------------------
-# Override with environment variable FREECAD_CMD if not set.
 FREECAD_CMD_PATH = os.environ.get(
     "FREECAD_CMD",
     r"D:\path\to\FreeCAD\bin\FreeCADCmd.exe",
 )
 
 # ---------------------------------------------------------------------------
-# Line ending & recompute helper (used when generating FreeCAD Python scripts)
+# Directory paths (relative to project root; can be absolute)
 # ---------------------------------------------------------------------------
-EOL = "\n"
-RECOMPUTE = f"App.ActiveDocument.recompute(){EOL}"
+INPUT_DIR      = "data/cad_json"        # Raw Fusion 360 JSON
+REPAIR_DIR     = "data/cad_json_repair" # Cleaned JSON
+OUTPUT_PY_DIR  = "data/cad_py_repair"   # Generated FreeCAD .py scripts
+OUTPUT_FREE_DIR = "data/cad_free_repair" # Validated .FCStd files
+LOG_DIR        = "logging"              # Log files & SQLite database
 
 # ---------------------------------------------------------------------------
-# FreeCAD library path (for scripts that import FreeCAD modules directly)
+# Database paths
 # ---------------------------------------------------------------------------
-FREECAD_LIB_PATH = os.environ.get(
-    "FREECAD_LIB",
-    r"D:\path\to\FreeCAD\lib",
-)
+DB_PATH       = os.path.join(LOG_DIR, "log.db")
+NAME_DB_PATH  = "utils/name_mapping.db"
+
+# ---------------------------------------------------------------------------
+# Processing defaults
+# ---------------------------------------------------------------------------
+DEFAULT_PROCESSES = 8     # Max worker processes (actual: min(cpu-1, this))
+DEFAULT_BATCH_SIZE = 50   # DB flush interval
+
+# ---------------------------------------------------------------------------
+# Script generation constants
+# ---------------------------------------------------------------------------
+EOL       = "\n"
+RECOMPUTE = f"App.ActiveDocument.recompute(){EOL}"

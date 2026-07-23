@@ -5,9 +5,9 @@ Modules:
   - config: paths and constants
   - free_operation: FreeCAD script generation
   - free_check: FreeCAD model validation
+  - get_free_bbox: bounding-box computation
   - load_fusion: Fusion 360 JSON parsing
   - logging_db: SQLite logging database
   - naming_utils: name encoding / mapping
-  - cad_filter: CAD model filtering
-  - get_free_bbox: bounding-box computation
+  - cad_filter: CAD model filtering (standalone tool)
 """

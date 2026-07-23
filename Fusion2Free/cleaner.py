@@ -82,10 +82,17 @@ def repair_fusion(fusion_json):
 
 
 if __name__ == "__main__":
-    fusion_json_path = "data/deepcad/cad_json/0000/00000000.json"
-    fusion_json_path_save = "data/cad_json_repair/0000/00000000.json"
-    os.makedirs(os.path.join("data/cad_json_repair", "0000"), exist_ok=True)
-    fusion_json = load_fusion(fusion_json_path)
-    repaired = repair_fusion(fusion_json)
-    with open(fusion_json_path_save, "w") as f:
-        json.dump(repaired, f, indent=4)
+    from fusion2free.utils.config import INPUT_DIR, REPAIR_DIR
+
+    # Quick test: clean a single model
+    test_path = os.path.join(INPUT_DIR, "0000/00000007.json")
+    if os.path.exists(test_path):
+        save_path = os.path.join(REPAIR_DIR, "0000/00000007.json")
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        fusion_json = load_fusion(test_path)
+        repaired = repair_fusion(fusion_json)
+        with open(save_path, "w") as f:
+            json.dump(repaired, f, indent=4)
+        print(f"Saved: {save_path}")
+    else:
+        print(f"Test file not found: {test_path}")

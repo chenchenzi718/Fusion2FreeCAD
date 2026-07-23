@@ -15,16 +15,21 @@ Not supported:
 
 import math
 import os
-from math import radians
 
-from fusion2free.utils.config import FREECAD_LIB_PATH, EOL, RECOMPUTE
-from fusion2free.utils.free_operation import *
+from fusion2free.utils.config import NAME_DB_PATH, EOL, RECOMPUTE
+from fusion2free.utils.free_operation import (
+    free_make_extrude,
+    free_make_new_body,
+    free_make_new_doc,
+    free_make_new_sketch,
+    mul_mat,
+)
 from fusion2free.utils.load_fusion import load_fusion
 from fusion2free.utils.naming_utils import FreeCADNameEncoder
 
 
 # Global encoder instance (SQLite-backed, persisted as name_mapping.db)
-_encoder = FreeCADNameEncoder("utils/name_mapping.db")
+_encoder = FreeCADNameEncoder(NAME_DB_PATH)
 
 
 def init_db(db_path):
@@ -91,8 +96,6 @@ def fusion2free(data_id, fusion_json):
     error_code = ""
 
     sol = (
-        f"import sys{EOL}"
-        f'sys.path.append(r"{FREECAD_LIB_PATH}"){EOL}'
         f"import FreeCAD as App{EOL}"
         f"import Part{EOL}"
     )
@@ -301,12 +304,14 @@ def fusion2free(data_id, fusion_json):
 
 
 if __name__ == "__main__":
-    fusion_prefix_path = "data/cad_json/0092/00923353.json"
-    fusion_json = load_fusion(fusion_prefix_path)
-    data_id = fusion_prefix_path[-13:-5]
-    free_str, _, _ = fusion2free(data_id, fusion_json)
-    print(free_str)
+    from fusion2free.utils.config import INPUT_DIR
 
-    os.makedirs(f"data/output/{data_id[0:4]}/", exist_ok=True)
-    with open(f"data/output/{data_id[0:4]}/{data_id}_free.py", "w") as f:
-        f.write(free_str)
+    # Quick test: convert a single model
+    test_path = os.path.join(INPUT_DIR, "0000/00000007.json")
+    if os.path.exists(test_path):
+        fusion_json = load_fusion(test_path)
+        data_id = "00000007"
+        free_str, _, _ = fusion2free(data_id, fusion_json)
+        print(free_str)
+    else:
+        print(f"Test file not found: {test_path}")

@@ -2,22 +2,16 @@
 Bounding-box computation -- extract the combined bounding box from a FreeCAD .FCStd file
 and write it back to the source Fusion 360 JSON.
 
-Requires FreeCAD to be importable at runtime (set FREECAD_LIB environment variable).
+Uses FreeCADCmd (subprocess) so it does not require FreeCAD to be importable
+in the host Python interpreter.  Set FREECAD_CMD environment variable.
 """
 
 import json
 import os
-import sys
+import subprocess
+import tempfile
 
-from fusion2free.utils.config import FREECAD_LIB_PATH
-
-if FREECAD_LIB_PATH not in sys.path:
-    sys.path.append(FREECAD_LIB_PATH)
-os.environ["FREECAD_LIB"] = FREECAD_LIB_PATH
-
-import FreeCAD as App
-import FreeCAD
-
+from fusion2free.utils.config import FREECAD_CMD_PATH
 from fusion2free.utils.load_fusion import load_fusion
 
 
@@ -25,33 +19,62 @@ def get_combined_bbox(filepath):
     """
     Open a FreeCAD document and compute the combined bounding box of all Bodies.
 
+    Uses FreeCADCmd subprocess → avoids Python-version conflicts with FreeCAD.pyd.
+
     Returns a list [XMin, YMin, ZMin, XMax, YMax, ZMax] in mm.
     """
-    doc = FreeCAD.open(filepath)
-    doc = FreeCAD.ActiveDocument
+    script = f"""
+import json, sys
+import FreeCAD
+doc = FreeCAD.open(r"{filepath}")
+combined = None
+for obj in doc.Objects:
+    if obj.TypeId == "PartDesign::Body":
+        bbox = obj.Shape.BoundBox
+        if combined is None:
+            combined = bbox
+        else:
+            combined.add(bbox)
+if combined is None:
+    sys.exit("No PartDesign::Body found in the document")
+result = [combined.XMin, combined.YMin, combined.ZMin,
+          combined.XMax, combined.YMax, combined.ZMax]
+print("BBOX:" + json.dumps(result), flush=True)
+FreeCAD.closeDocument(doc.Name)
+"""
 
-    combined_bbox = None
+    tmp = tempfile.NamedTemporaryFile(suffix=".py", mode="w",
+                                       delete=False, encoding="utf-8")
+    tmp.write(script)
+    tmp.close()
+
     try:
-        for obj in doc.Objects:
-            if obj.TypeId == "PartDesign::Body":
-                shape = obj.Shape
-                bbox = shape.BoundBox
-                if combined_bbox is None:
-                    combined_bbox = bbox
-                else:
-                    combined_bbox.add(bbox)
-    except Exception as e:
-        raise RuntimeError(
-            f"Error processing bounding box for {filepath}: {e}"
+        result = subprocess.run(
+            [FREECAD_CMD_PATH, tmp.name],
+            capture_output=True, text=True, timeout=120,
         )
-    return [
-        combined_bbox.XMin,
-        combined_bbox.YMin,
-        combined_bbox.ZMin,
-        combined_bbox.XMax,
-        combined_bbox.YMax,
-        combined_bbox.ZMax,
-    ]
+        os.unlink(tmp.name)
+
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"FreeCADCmd failed for {filepath}: {result.stderr.strip()}"
+            )
+
+        # Find the tagged output line — ignore other FreeCAD log noise
+        bbox_line = None
+        for line in result.stdout.splitlines():
+            if line.startswith("BBOX:"):
+                bbox_line = line[5:]
+                break
+        if bbox_line is None:
+            raise RuntimeError(f"No BBOX output in stdout for {filepath}")
+
+        bbox_list = json.loads(bbox_line)
+        return bbox_list
+    except Exception as e:
+        if os.path.exists(tmp.name):
+            os.unlink(tmp.name)
+        raise RuntimeError(f"Error processing bounding box for {filepath}: {e}")
 
 
 def setup_to_fusion(bbox_tuple, json_path):
