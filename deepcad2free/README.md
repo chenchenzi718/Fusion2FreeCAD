@@ -77,4 +77,3 @@ seq = get_deepcad_sequence(json_data)  # e.g. "SNSCSCSC"
 
 - **Subprocess isolation** — FreeCAD is invoked via `FreeCADCmd` subprocess, never imported directly. This avoids Python version conflicts (`.pyd` files are compiled against a specific Python version).
 - **Multiprocessing** — `main.py` dispatches models to worker processes via `multiprocessing.Pool`. Each worker processes one model sequentially through all four pipeline steps.
-- **Logging** — Main process uses `logging` module with colored stderr output. Worker processes use `print(file=sys.stderr)` with ANSI color codes (green for success, red for errors). `tqdm` progress bar writes to stdout so it is not corrupted.
