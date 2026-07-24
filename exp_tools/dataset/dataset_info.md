@@ -15,25 +15,26 @@ Files follow the pattern `{data_id}_free.py`, where `data_id` is an 8-digit iden
 
 ## Usage
 
-### Execute a single model
+### Run experiments via exp_tools
 
 ```bash
-FreeCADCmd.exe model_file.py
+# Run all experiments on the dataset
+python -m exp_tools.main --dataset-dir exp_tools/dataset
 ```
 
-### Scan features
+### Scan features (single model)
 
 ```bash
-FreeCADCmd.exe test_model.py model_file.py 777777
+FreeCADCmd.exe exp_tools/modifier/test_model.py model_file.py scan
 ```
 
 ### Modify a feature by scale factor
 
 ```bash
-FreeCADCmd.exe test_model.py model_file.py 888888 <feature_index> <scale_factor>
+FreeCADCmd.exe exp_tools/modifier/test_model.py model_file.py test <feature_idx> <scale_factor>
 ```
 
-See the main [README.md](../../README.md) for detailed instructions.
+See the [exp_tools README](../README.md) for detailed instructions.
 
 ## Filtering Criteria
 

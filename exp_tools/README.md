@@ -6,11 +6,93 @@ Utilities for modifying parameters of FreeCAD CAD models. These tools operate on
 
 ```
 exp_tools/
+├── main.py                  # Experiment runner (entry point)
+├── config.py                # Configuration — paths, scale range, random seed
 ├── modifier/
-│   ├── feature_modifier.py    # Modify features in .FCStd files directly
-│   ├── test_model.py          # Load .py scripts, scan or modify features
-│   └── gradient_gen.py        # Gradient scale generator & CSV helpers
-└── dataset/                   # ~425 validated FreeCAD Python scripts
+│   ├── test_model.py        # Load .py scripts, scan or modify features
+│   ├── feature_modifier.py  # Modify features in .FCStd files directly
+│   └── gradient_gen.py      # Gradient scale generator & CSV helpers
+└── dataset/                 # ~425 validated FreeCAD Python scripts
+```
+
+## Quick Start
+
+### 1. Configure
+
+Edit `exp_tools/config.py` or set environment variables:
+
+```bash
+# Set FreeCAD path
+set FREECAD_CMD=C:\path\to\FreeCAD\bin\FreeCADCmd.exe
+```
+
+### 2. Run Experiments
+
+```bash
+# Run all experiments with defaults
+python -m exp_tools.main
+
+# Custom parameters
+python -m exp_tools.main \
+    --dataset-dir exp_tools/dataset \
+    --output-dir exp_output \
+    --scales 5 \
+    --scale-min 0.1 \
+    --scale-max 0.9 \
+    --seed 42 \
+    --verbose
+```
+
+For each model, the runner:
+1. **Scans** all Pad/Pocket features via `test_model.py scan`
+2. **Samples** `NUM_SCALES` random scale factors from `[SCALE_MIN, SCALE_MAX]` per feature
+3. **Modifies** the feature by each scale, exports BRep files
+4. **Logs** results to per-experiment log files
+
+### 3. Output Structure
+
+```
+exp_output/
+├── experiment.log           # Overall run log
+├── summary.csv              # Per-experiment summary (success/fail)
+├── 00039419/                # Model output directory
+│   ├── scan_all.json        # Feature scan result (JSON)
+│   ├── scan_all.log         # FreeCAD scan output
+│   └── feature_0/           # Per-feature directory
+│       ├── scale_0.3456/    # Per-scale experiment
+│       │   ├── experiment.log
+│       │   ├── original.brep
+│       │   └── modified.brep
+│       ├── scale_0.7821/
+│       │   └── ...
+│       └── ...
+├── 00040108/
+│   └── ...
+```
+
+## Test Model
+
+The `test_model.py` script is executed inside `FreeCADCmd` and supports two modes:
+
+### Scan Mode
+
+List all modifiable Pad/Pocket features as JSON:
+
+```bash
+FreeCADCmd.exe modifier/test_model.py <model.py> scan
+```
+
+### Test Mode
+
+Modify a feature by scale factor, optionally export BRep:
+
+```bash
+# Basic — modify only
+FreeCADCmd.exe modifier/test_model.py <model.py> test <feature_idx> <scale_factor>
+
+# With BRep export
+FreeCADCmd.exe modifier/test_model.py <model.py> test <feature_idx> <scale_factor> \
+    <original.brep> <modified.brep>
 ```
 
 ## Feature Modifier
@@ -27,31 +109,7 @@ Modify Pad/Pocket/Fillet/Chamfer features in `.FCStd` files.
 
 **Usage:**
 ```bash
-FreeCADCmd.exe feature_modifier.py model.FCStd <feature_index>
-```
-
-## Test Model
-
-Load a FreeCAD Python script, scan its features, or modify parameters.
-
-**Modes:**
-
-| Mode | feature_idx | Description |
-|---|---|---|
-| SCAN_ALL | 777777 | List all modifiable Pad/Pocket features |
-| TEST | 888888 | Modify a specific feature by scale factor |
-| SINGLE | (default) | Modify feature at index to random length |
-
-**Usage:**
-```bash
-# Scan all features (outputs JSON)
-FreeCADCmd.exe test_model.py model.py 777777
-
-# Modify feature 2 with 1.5x scale
-FreeCADCmd.exe test_model.py model.py 888888 2 1.5 group_a_scale0
-
-# Modify feature 0 to random length in [10, 50] mm
-FreeCADCmd.exe test_model.py model.py 0 10 50
+FreeCADCmd.exe modifier/feature_modifier.py model.FCStd <feature_index>
 ```
 
 ## Gradient Generator

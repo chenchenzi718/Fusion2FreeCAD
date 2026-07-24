@@ -74,35 +74,37 @@ For pipeline details and module-level API documentation, see [deepcad2free/READM
 
 ### Experiment Tools
 
-The `exp_tools/` directory contains utilities for modifying already-converted FreeCAD models.
+The `exp_tools/` directory contains utilities for running parameter modification experiments on converted FreeCAD models.
 
-#### Feature Modifier
+#### Run All Experiments
 
-Modify Pad/Pocket/Fillet/Chamfer features in `.FCStd` files:
+For each model in the dataset, scan features and modify each by random scale factors:
 
 ```bash
-FreeCADCmd.exe exp_tools/modifier/feature_modifier.py model.FCStd 0
+# Default: 5 random scales per feature in [0.1, 0.9], seed=42
+python -m exp_tools.main
+
+# Custom parameters
+python -m exp_tools.main \
+    --dataset-dir exp_tools/dataset \
+    --output-dir exp_output \
+    --scales 5 --scale-min 0.1 --scale-max 0.9 \
+    --seed 42 --verbose
 ```
 
-#### Test Model
+Results are written to `--output-dir` with a `summary.csv` and per-model output folders.
 
-Scan features or modify by scale factor:
+#### Single-Model Tools
 
 ```bash
-# Scan all features
-FreeCADCmd.exe exp_tools/modifier/test_model.py model.py 777777
+# Scan all features of a model
+FreeCADCmd.exe exp_tools/modifier/test_model.py model.py scan
 
 # Modify feature 2 with 1.5x scale
-FreeCADCmd.exe exp_tools/modifier/test_model.py model.py 888888 2 1.5
+FreeCADCmd.exe exp_tools/modifier/test_model.py model.py test 2 1.5
 ```
 
-#### Gradient Generator
-
-```python
-from exp_tools.modifier.gradient_gen import generate_scales
-
-generate_scales("scales.txt", 0.1, 1.9, 5)
-```
+See [exp_tools/README.md](exp_tools/README.md) for more details.
 
 ## Dataset
 

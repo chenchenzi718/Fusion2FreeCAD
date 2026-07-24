@@ -19,8 +19,8 @@ FREECAD_CMD_PATH = os.environ.get(
 # Dataset path -- directory containing *_free.py model scripts
 # ---------------------------------------------------------------------------
 DATASET_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "exp_tools", "dataset",
+    os.path.dirname(os.path.abspath(__file__)),
+    "dataset",
 )
 
 # ---------------------------------------------------------------------------
