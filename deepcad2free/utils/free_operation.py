@@ -2,7 +2,7 @@
 FreeCAD script generation -- generates FreeCAD Python API calls.
 
 These functions produce string fragments that, when concatenated, form a
-complete FreeCAD Python script. Coordinates are in meters (Fusion 360)
+complete FreeCAD Python script. Coordinates are in meters (DeepCAD)
 and are multiplied by 1000 to convert to mm (FreeCAD convention).
 
 Compatibility notes for FreeCAD 0.21+:
@@ -13,7 +13,7 @@ Compatibility notes for FreeCAD 0.21+:
 
 import numpy as np
 
-from fusion2free.utils.config import EOL, RECOMPUTE
+from deepcad2free.utils.config import EOL, RECOMPUTE
 
 
 # ---------------------------------------------------------------------------
@@ -125,9 +125,9 @@ def free_make_bbox(min_pt, max_pt) -> str:
     return f"{line1}{EOL}{line2}{EOL}{line3}{EOL}"
 
 
-def free_make_new_body(fusion_sketch_id, fusion_extrude_id) -> str:
+def free_make_new_body(deepcad_sketch_id, deepcad_extrude_id) -> str:
     """Create a new PartDesign Body."""
-    body_name = f"Body_{fusion_sketch_id}"
+    body_name = f"Body_{deepcad_sketch_id}"
     line1 = f'App.ActiveDocument.addObject("PartDesign::Body","{body_name}")'
     line2 = f'App.ActiveDocument.getObject("{body_name}").Label = "{body_name}"'
     return f"{line1}{EOL}{line2}{EOL}{RECOMPUTE}{EOL}"
@@ -137,11 +137,11 @@ def free_make_new_body(fusion_sketch_id, fusion_extrude_id) -> str:
 # PartDesign Pad / Pocket
 # ---------------------------------------------------------------------------
 
-def free_pad(extrude_parameter, data_id, fusion_extrude_id, fusion_sketch_id, profile_id, now_body) -> str:
+def free_pad(extrude_parameter, data_id, deepcad_extrude_id, deepcad_sketch_id, profile_id, now_body) -> str:
     """Generate PartDesign::Pad code."""
     body_name = now_body
-    pad_name = f"Extrude_{fusion_sketch_id}_{fusion_extrude_id}_{profile_id}"
-    sketch_ref = f"Sketch_{fusion_sketch_id}_{profile_id}"
+    pad_name = f"Extrude_{deepcad_sketch_id}_{deepcad_extrude_id}_{profile_id}"
+    sketch_ref = f"Sketch_{deepcad_sketch_id}_{profile_id}"
     ret_str = ""
     line0 = f'App.ActiveDocument.getObject("{body_name}").newObject("PartDesign::Pad","{pad_name}")'
     line1 = f'App.ActiveDocument.getObject("{pad_name}").Profile = App.ActiveDocument.getObject("{sketch_ref}")'
@@ -197,11 +197,11 @@ def _pad_props(name, length, type_val, reversed_val, sketch_ref, midplane, extra
     )
 
 
-def free_pocket(extrude_parameter, data_id, fusion_extrude_id, fusion_sketch_id, profile_id, now_body):
+def free_pocket(extrude_parameter, data_id, deepcad_extrude_id, deepcad_sketch_id, profile_id, now_body):
     """Generate PartDesign::Pocket code."""
     body_name = now_body
-    pocket_name = f"Extrude_{fusion_sketch_id}_{fusion_extrude_id}_{profile_id}"
-    sketch_ref = f"Sketch_{fusion_sketch_id}_{profile_id}"
+    pocket_name = f"Extrude_{deepcad_sketch_id}_{deepcad_extrude_id}_{profile_id}"
+    sketch_ref = f"Sketch_{deepcad_sketch_id}_{profile_id}"
     ret_str = ""
     line0 = f'App.ActiveDocument.getObject("{body_name}").newObject("PartDesign::Pocket","{pocket_name}")'
     line1 = f'App.ActiveDocument.getObject("{pocket_name}").Profile = App.ActiveDocument.getObject("{sketch_ref}")'
@@ -259,15 +259,15 @@ def _pocket_props(name, length, type_val, reversed_val, sketch_ref, midplane, ex
     )
 
 
-def free_make_extrude(boolean_operation, extrude_parameter, data_id, fusion_extrude_id,
-                      fusion_sketch_id, loop_id, now_body) -> str:
+def free_make_extrude(boolean_operation, extrude_parameter, data_id, deepcad_extrude_id,
+                      deepcad_sketch_id, loop_id, now_body) -> str:
     """Dispatch to free_pad or free_pocket based on boolean operation type."""
     if boolean_operation in ("NewBodyFeatureOperation", "JoinFeatureOperation"):
-        return free_pad(extrude_parameter, data_id, fusion_extrude_id,
-                        fusion_sketch_id, loop_id, now_body)
+        return free_pad(extrude_parameter, data_id, deepcad_extrude_id,
+                        deepcad_sketch_id, loop_id, now_body)
     elif boolean_operation == "CutFeatureOperation":
-        return free_pocket(extrude_parameter, data_id, fusion_extrude_id,
-                           fusion_sketch_id, loop_id, now_body)
+        return free_pocket(extrude_parameter, data_id, deepcad_extrude_id,
+                           deepcad_sketch_id, loop_id, now_body)
     else:
         raise NotImplementedError(
             f"Boolean operation '{boolean_operation}' is not supported."
@@ -278,10 +278,10 @@ def free_make_extrude(boolean_operation, extrude_parameter, data_id, fusion_extr
 # Sketch
 # ---------------------------------------------------------------------------
 
-def free_make_new_sketch(data_id, fusion_extrude_id, fusion_sketch_id, profile_id,
+def free_make_new_sketch(data_id, deepcad_extrude_id, deepcad_sketch_id, profile_id,
                          operation_list, transform, now_body_name) -> str:
     """Generate a new sketch with geometry inside a PartDesign Body."""
-    sketch_name = f"Sketch_{fusion_sketch_id}_{profile_id}"
+    sketch_name = f"Sketch_{deepcad_sketch_id}_{profile_id}"
     body_name = now_body_name
 
     line_plane = (

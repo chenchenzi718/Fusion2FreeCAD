@@ -1,11 +1,11 @@
 """
-Fusion2Free -- Main entry point for the conversion pipeline.
+DeepCAD2Free -- Main entry point for the conversion pipeline.
 
 Usage:
     # Full pipeline (clean + convert + validate + bbox)
     python main.py
 
-    # Only clean (repair Fusion JSON)
+    # Only clean (repair DeepCAD JSON)
     python main.py --clean-only
 
     # Only convert (requires cleaned data in data/cad_json_repair/)
@@ -35,13 +35,13 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from fusion2free.converter import fusion2free
-from fusion2free.cleaner import repair_fusion
-from fusion2free.utils.free_check import run_freecad_modeling
-from fusion2free.utils.get_free_bbox import get_combined_bbox, setup_to_fusion
-from fusion2free.utils.load_fusion import get_fusion_sequence, load_fusion
-from fusion2free.utils.logging_db import LogDatabase
-from fusion2free.utils.config import (
+from deepcad2free.converter import deepcad2free
+from deepcad2free.cleaner import repair_deepcad
+from deepcad2free.utils.free_check import run_freecad_modeling
+from deepcad2free.utils.get_free_bbox import get_combined_bbox, setup_to_deepcad
+from deepcad2free.utils.load_deepcad import get_deepcad_sequence, load_deepcad
+from deepcad2free.utils.logging_db import LogDatabase
+from deepcad2free.utils.config import (
     FREECAD_CMD_PATH,
     INPUT_DIR,
     REPAIR_DIR,
@@ -111,22 +111,22 @@ def setup_logging(log_path: str, verbose: bool = False):
 # Step 1 -- Data cleaning
 # ---------------------------------------------------------------------------
 
-def clean_all(fusion_input_path: str, fusion_repair_path: str) -> int:
+def clean_all(deepcad_input_path: str, deepcad_repair_path: str) -> int:
     """
-    Walk *fusion_input_path*, repair every JSON, and write to *fusion_repair_path*.
+    Walk *deepcad_input_path*, repair every JSON, and write to *deepcad_repair_path*.
     Returns the number of files processed.
     """
-    fusion_input_path = os.path.abspath(fusion_input_path)
-    fusion_repair_path = os.path.abspath(fusion_repair_path)
+    deepcad_input_path = os.path.abspath(deepcad_input_path)
+    deepcad_repair_path = os.path.abspath(deepcad_repair_path)
 
-    if not os.path.isdir(fusion_input_path):
-        logger.error(f"Input directory not found: {fusion_input_path}")
+    if not os.path.isdir(deepcad_input_path):
+        logger.error(f"Input directory not found: {deepcad_input_path}")
         return 0
 
     count = 0
-    for root, _, files in os.walk(fusion_input_path):
-        rel = os.path.relpath(root, fusion_input_path)
-        target_dir = os.path.join(fusion_repair_path, rel)
+    for root, _, files in os.walk(deepcad_input_path):
+        rel = os.path.relpath(root, deepcad_input_path)
+        target_dir = os.path.join(deepcad_repair_path, rel)
         os.makedirs(target_dir, exist_ok=True)
 
         for fname in tqdm(files, desc="Cleaning JSON"):
@@ -135,20 +135,20 @@ def clean_all(fusion_input_path: str, fusion_repair_path: str) -> int:
             src = os.path.join(root, fname)
             dst = os.path.join(target_dir, fname)
             try:
-                fusion_json = load_fusion(src)
-                repaired = repair_fusion(fusion_json)
+                deepcad_json = load_deepcad(src)
+                repaired = repair_deepcad(deepcad_json)
                 with open(dst, "w", encoding="utf-8") as fout:
                     json.dump(repaired, fout, indent=4)
                 count += 1
             except Exception as e:
                 logger.error(f"Failed to clean {src}: {e}")
 
-    logger.info(f"Cleaning done -- {count} file(s) repaired -> {fusion_repair_path}")
+    logger.info(f"Cleaning done -- {count} file(s) repaired -> {deepcad_repair_path}")
     return count
 
 
 # ---------------------------------------------------------------------------
-# Step 2 -- Conversion helpers (refactored from batch_processor.py)
+# Step 2 -- Conversion helpers
 # ---------------------------------------------------------------------------
 
 def _log(msg: str):
@@ -170,7 +170,7 @@ def _log_err(key: str, step: str, error: str):
 def handle_conversion(key, val, op_seq, output_py_path):
     """Convert a single model, return update data for the database."""
     try:
-        ret_str, Free_str, error_code = fusion2free(key, val)
+        ret_str, Free_str, error_code = deepcad2free(key, val)
         if op_seq and op_seq[-1] == "S":
             error_code = "UNUSED SKETCH"
 
@@ -224,14 +224,14 @@ def handle_validation(key, output_py_path, log_path, output_free_path):
     return key, update_data, success
 
 
-def handle_bbox(key, log_path, output_free_path, fusion_path):
+def handle_bbox(key, log_path, output_free_path, deepcad_path):
     """Compute and update the bounding box."""
     try:
         free_path = os.path.join(
             output_free_path, key[:4], f"{key}_free.FCStd"
         )
         bbox_tuple = get_combined_bbox(free_path)
-        setup_to_fusion(bbox_tuple, fusion_path)
+        setup_to_deepcad(bbox_tuple, deepcad_path)
         _log_ok(key, "bbox")
         update_data = {"is_valid": 1}
         success = True
@@ -253,7 +253,7 @@ def process_single_file(path_data):
     result_data = {"key": key, "updates": []}
 
     try:
-        val = load_fusion(path)
+        val = load_deepcad(path)
     except Exception as e:
         error_msg = f"Error loading {path}: {e}"
         _log_err(key, "load", error_msg)
@@ -280,7 +280,7 @@ def process_single_file(path_data):
     }
     result_data["updates"].append({"key": key, "data": init_data})
 
-    op_seq = get_fusion_sequence(val)
+    op_seq = get_deepcad_sequence(val)
     result_data["updates"].append({"key": key, "data": {"fusion_sequence": op_seq}})
 
     _log(f"[{key}] processing ...")
@@ -312,7 +312,7 @@ def process_single_file(path_data):
 # ---------------------------------------------------------------------------
 
 def convert_all(
-    fusion_repair_path: str,
+    deepcad_repair_path: str,
     output_py_path: str,
     output_free_path: str,
     log_path: str,
@@ -320,18 +320,16 @@ def convert_all(
     batch_size: int = 50,
 ):
     """
-    Convert all JSON files under *fusion_repair_path*.
+    Convert all JSON files under *deepcad_repair_path*.
 
     For each model:
-      1. Load Fusion 360 JSON
+      1. Load DeepCAD JSON
       2. Convert to FreeCAD Python script
       3. Validate via FreeCADCmd
       4. Update bounding box
       5. Track status in SQLite database
     """
-    import json as _json
-
-    fusion_repair_path = os.path.abspath(fusion_repair_path)
+    deepcad_repair_path = os.path.abspath(deepcad_repair_path)
     output_py_path = os.path.abspath(output_py_path)
     output_free_path = os.path.abspath(output_free_path)
     log_path = os.path.abspath(log_path)
@@ -343,13 +341,13 @@ def convert_all(
 
     # Collect JSON files
     json_path_list = []
-    for root, _, files in os.walk(fusion_repair_path):
+    for root, _, files in os.walk(deepcad_repair_path):
         json_path_list.extend(
             [os.path.join(root, f) for f in files if f.endswith(".json")]
         )
 
     if not json_path_list:
-        logger.warning(f"No JSON files found under {fusion_repair_path}")
+        logger.warning(f"No JSON files found under {deepcad_repair_path}")
         return
 
     logger.info(f"Found {len(json_path_list)} JSON file(s) to convert")
@@ -425,7 +423,7 @@ logger = logging.getLogger(__name__)
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Fusion2Free -- Convert Fusion 360 JSON to FreeCAD Python scripts"
+        description="DeepCAD2Free -- Convert DeepCAD JSON to FreeCAD Python scripts"
     )
 
     parser.add_argument(
@@ -442,7 +440,7 @@ def parse_args():
     parser.add_argument(
         "--input",
         default=INPUT_DIR,
-        help=f"Input directory with Fusion 360 JSON files (default: {INPUT_DIR})",
+        help=f"Input directory with DeepCAD JSON files (default: {INPUT_DIR})",
     )
     parser.add_argument(
         "--repair-dir",
@@ -532,7 +530,7 @@ def main():
         logger.info("=" * 60)
 
         convert_all(
-            fusion_repair_path=args.repair_dir,
+            deepcad_repair_path=args.repair_dir,
             output_py_path=args.output_py,
             output_free_path=args.output_free,
             log_path=args.log_dir,

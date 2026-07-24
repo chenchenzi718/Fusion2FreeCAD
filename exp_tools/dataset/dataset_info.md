@@ -38,7 +38,7 @@ See the main [README.md](../../README.md) for detailed instructions.
 ## Filtering Criteria
 
 The models in this dataset were selected through a multi-stage filtering process:
-- Successfully converted from Fusion 360 JSON to FreeCAD Python
+- Successfully converted from DeepCAD JSON to FreeCAD Python
 - Successfully rebuilt in FreeCAD (no errors during script execution)
 - Contain at least one modifiable Pad or Pocket feature
 - Filtered for structural diversity (varying operation sequence lengths and types)

@@ -1,6 +1,6 @@
 """
 Bounding-box computation -- extract the combined bounding box from a FreeCAD .FCStd file
-and write it back to the source Fusion 360 JSON.
+and write it back to the source DeepCAD JSON.
 
 Uses FreeCADCmd (subprocess) so it does not require FreeCAD to be importable
 in the host Python interpreter.  Set FREECAD_CMD environment variable.
@@ -11,8 +11,8 @@ import os
 import subprocess
 import tempfile
 
-from fusion2free.utils.config import FREECAD_CMD_PATH
-from fusion2free.utils.load_fusion import load_fusion
+from deepcad2free.utils.config import FREECAD_CMD_PATH
+from deepcad2free.utils.load_deepcad import load_deepcad
 
 
 def get_combined_bbox(filepath):
@@ -77,16 +77,16 @@ FreeCAD.closeDocument(doc.Name)
         raise RuntimeError(f"Error processing bounding box for {filepath}: {e}")
 
 
-def setup_to_fusion(bbox_tuple, json_path):
+def setup_to_deepcad(bbox_tuple, json_path):
     """
-    Write bounding-box values (in mm) back to the source Fusion JSON (converted to meters).
+    Write bounding-box values (in mm) back to the source DeepCAD JSON (converted to meters).
     """
-    fusion_json = load_fusion(json_path)
-    fusion_json["properties"]["bounding_box"]["min_point"]["x"] = bbox_tuple[0] / 1000.0
-    fusion_json["properties"]["bounding_box"]["min_point"]["y"] = bbox_tuple[1] / 1000.0
-    fusion_json["properties"]["bounding_box"]["min_point"]["z"] = bbox_tuple[2] / 1000.0
-    fusion_json["properties"]["bounding_box"]["max_point"]["x"] = bbox_tuple[3] / 1000.0
-    fusion_json["properties"]["bounding_box"]["max_point"]["y"] = bbox_tuple[4] / 1000.0
-    fusion_json["properties"]["bounding_box"]["max_point"]["z"] = bbox_tuple[5] / 1000.0
+    deepcad_json = load_deepcad(json_path)
+    deepcad_json["properties"]["bounding_box"]["min_point"]["x"] = bbox_tuple[0] / 1000.0
+    deepcad_json["properties"]["bounding_box"]["min_point"]["y"] = bbox_tuple[1] / 1000.0
+    deepcad_json["properties"]["bounding_box"]["min_point"]["z"] = bbox_tuple[2] / 1000.0
+    deepcad_json["properties"]["bounding_box"]["max_point"]["x"] = bbox_tuple[3] / 1000.0
+    deepcad_json["properties"]["bounding_box"]["max_point"]["y"] = bbox_tuple[4] / 1000.0
+    deepcad_json["properties"]["bounding_box"]["max_point"]["z"] = bbox_tuple[5] / 1000.0
     with open(json_path, "w") as f:
-        json.dump(fusion_json, f, indent=4)
+        json.dump(deepcad_json, f, indent=4)

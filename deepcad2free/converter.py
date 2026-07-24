@@ -1,7 +1,7 @@
 """
-Core conversion engine -- Fusion 360 JSON -> FreeCAD Python script.
+Core conversion engine -- DeepCAD JSON -> FreeCAD Python script.
 
-Converts Fusion 360 serialized model representations (DeepCAD format) into
+Converts DeepCAD serialized model representations into
 executable FreeCAD Python scripts that rebuild the same parametric model.
 
 Supported operations:
@@ -10,22 +10,22 @@ Supported operations:
 
 Not supported:
   - IntersectFeatureOperation
-  - Revolve, Sweep, Loft, and other Fusion features
+  - Revolve, Sweep, Loft, and other features
 """
 
 import math
 import os
 
-from fusion2free.utils.config import NAME_DB_PATH, EOL, RECOMPUTE
-from fusion2free.utils.free_operation import (
+from deepcad2free.utils.config import NAME_DB_PATH, EOL, RECOMPUTE
+from deepcad2free.utils.free_operation import (
     free_make_extrude,
     free_make_new_body,
     free_make_new_doc,
     free_make_new_sketch,
     mul_mat,
 )
-from fusion2free.utils.load_fusion import load_fusion
-from fusion2free.utils.naming_utils import FreeCADNameEncoder
+from deepcad2free.utils.load_deepcad import load_deepcad
+from deepcad2free.utils.naming_utils import FreeCADNameEncoder
 
 
 # Global encoder instance (SQLite-backed, persisted as name_mapping.db)
@@ -42,9 +42,9 @@ def init_db(db_path):
 encoder = _encoder
 
 
-def angle_fusion_2_free(swept_angle, reference_vec, normal_vec):
+def angle_deepcad_2_free(swept_angle, reference_vec, normal_vec):
     """
-    Convert arc angles from Fusion 360 convention to FreeCAD convention.
+    Convert arc angles from DeepCAD convention to FreeCAD convention.
     """
     normal_z = normal_vec[2]
     if normal_z < 0:
@@ -70,21 +70,21 @@ def angle_fusion_2_free(swept_angle, reference_vec, normal_vec):
     return start_angle_in_FreeCAD, end_angle_in_FreeCAD
 
 
-def _get_encoder_name(encoder, fusion_id):
+def _get_encoder_name(encoder, deepcad_id):
     """Look up encoded name; fall back to a safe replacement."""
-    result = encoder.decode_name_fusion2free(fusion_id)
+    result = encoder.decode_name_deepcad2free(deepcad_id)
     if result is None:
-        return fusion_id.replace(":", "_").replace("/", "_")
+        return deepcad_id.replace(":", "_").replace("/", "_")
     return result
 
 
-def fusion2free(data_id, fusion_json):
+def deepcad2free(data_id, deepcad_json):
     """
-    Convert a Fusion 360 JSON model to a FreeCAD Python script string.
+    Convert a DeepCAD JSON model to a FreeCAD Python script string.
 
     Args:
         data_id: model identifier (used as document name)
-        fusion_json: parsed Fusion 360 JSON dict
+        deepcad_json: parsed DeepCAD JSON dict
 
     Returns:
         (ret_str, Free_str, error_code)
@@ -101,9 +101,8 @@ def fusion2free(data_id, fusion_json):
     )
     ret_str = sol
 
-    seq_list = fusion_json["sequence"]
-    entry_dict = fusion_json["entities"]
-    bbox_fusion = fusion_json["properties"]["bounding_box"]
+    seq_list = deepcad_json["sequence"]
+    entry_dict = deepcad_json["entities"]
 
     sketch_dict = {}
     ret_str += free_make_new_doc(data_id)
@@ -115,21 +114,21 @@ def fusion2free(data_id, fusion_json):
         op_type = op_info["type"]
 
         if op_type == "ExtrudeFeature":
-            fusion_extrude_parameter = entry_dict[op_name]
-            extrude_profile_list = fusion_extrude_parameter["profiles"]
+            deepcad_extrude_parameter = entry_dict[op_name]
+            extrude_profile_list = deepcad_extrude_parameter["profiles"]
             if len(extrude_profile_list) == 0:
                 error_code = "EMPTY EXTRUDE PROFILE"
                 continue
 
-            extrude_boolean_op = fusion_extrude_parameter["operation"]
-            fusion_sketch_id = fusion_extrude_parameter["profiles"][0]["sketch"]
-            fusion_sketch_id_enc = _get_encoder_name(encoder, fusion_sketch_id)
-            fusion_extrude_id_enc = _get_encoder_name(encoder, op_name)
+            extrude_boolean_op = deepcad_extrude_parameter["operation"]
+            deepcad_sketch_id = deepcad_extrude_parameter["profiles"][0]["sketch"]
+            deepcad_sketch_id_enc = _get_encoder_name(encoder, deepcad_sketch_id)
+            deepcad_extrude_id_enc = _get_encoder_name(encoder, op_name)
 
             if extrude_boolean_op == "NewBodyFeatureOperation":
-                body_name = f"Body_{fusion_sketch_id_enc}"
+                body_name = f"Body_{deepcad_sketch_id_enc}"
                 now_body = body_name
-                ret_str += free_make_new_body(fusion_sketch_id_enc, fusion_extrude_id_enc)
+                ret_str += free_make_new_body(deepcad_sketch_id_enc, deepcad_extrude_id_enc)
 
                 for index, profile in enumerate(extrude_profile_list):
                     sketch_name = profile["sketch"]
@@ -138,7 +137,7 @@ def fusion2free(data_id, fusion_json):
                     extrude_op_name_enc = _get_encoder_name(encoder, op_name)
 
                     ret_str += free_make_new_sketch(
-                        data_id, fusion_extrude_id_enc, fusion_sketch_id_enc,
+                        data_id, deepcad_extrude_id_enc, deepcad_sketch_id_enc,
                         loop_name_enc,
                         sketch_dict[sketch_name]["profile"][loop_name],
                         sketch_dict[sketch_name]["transform"],
@@ -152,10 +151,10 @@ def fusion2free(data_id, fusion_json):
 
                     ret_str += free_make_extrude(
                         extrude_boolean_op,
-                        fusion_extrude_parameter,
+                        deepcad_extrude_parameter,
                         data_id,
                         extrude_op_name_enc,
-                        fusion_sketch_id_enc,
+                        deepcad_sketch_id_enc,
                         loop_name_enc,
                         now_body,
                     )
@@ -169,7 +168,7 @@ def fusion2free(data_id, fusion_json):
                     extrude_op_name_enc = _get_encoder_name(encoder, op_name)
 
                     ret_str += free_make_new_sketch(
-                        data_id, fusion_extrude_id_enc, fusion_sketch_id_enc,
+                        data_id, deepcad_extrude_id_enc, deepcad_sketch_id_enc,
                         loop_name_enc,
                         sketch_dict[sketch_name]["profile"][loop_name],
                         sketch_dict[sketch_name]["transform"],
@@ -178,10 +177,10 @@ def fusion2free(data_id, fusion_json):
                     Free_str += "S"
                     ret_str += free_make_extrude(
                         extrude_boolean_op,
-                        fusion_extrude_parameter,
+                        deepcad_extrude_parameter,
                         data_id,
                         extrude_op_name_enc,
-                        fusion_sketch_id_enc,
+                        deepcad_sketch_id_enc,
                         loop_name_enc,
                         now_body,
                     )
@@ -196,7 +195,7 @@ def fusion2free(data_id, fusion_json):
                     extrude_op_name_enc = _get_encoder_name(encoder, op_name)
 
                     ret_str += free_make_new_sketch(
-                        data_id, fusion_extrude_id_enc, fusion_sketch_id_enc,
+                        data_id, deepcad_extrude_id_enc, deepcad_sketch_id_enc,
                         loop_name_enc,
                         sketch_dict[sketch_name]["profile"][loop_name],
                         sketch_dict[sketch_name]["transform"],
@@ -205,10 +204,10 @@ def fusion2free(data_id, fusion_json):
                     Free_str += "S"
                     ret_str += free_make_extrude(
                         extrude_boolean_op,
-                        fusion_extrude_parameter,
+                        deepcad_extrude_parameter,
                         data_id,
                         extrude_op_name_enc,
-                        fusion_sketch_id_enc,
+                        deepcad_sketch_id_enc,
                         loop_name_enc,
                         now_body,
                     )
@@ -226,10 +225,10 @@ def fusion2free(data_id, fusion_json):
 
         elif op_type == "Sketch":
             sketch_dict[op_name] = {}
-            fusion_transform = entry_dict[op_name]["transform"]
+            transform_src = entry_dict[op_name]["transform"]
             keys = ["origin", "x_axis", "y_axis", "z_axis"]
             transform_list = [
-                fusion_transform[key][axis]
+                transform_src[key][axis]
                 for key in keys
                 for axis in ["x", "y", "z"]
             ]
@@ -267,7 +266,7 @@ def fusion2free(data_id, fusion_json):
 
                             normal = mul_mat(normal, transform_list)
 
-                            start_angle, end_angle = angle_fusion_2_free(
+                            start_angle, end_angle = angle_deepcad_2_free(
                                 swept_angle, reference_vec, normal_vec=normal
                             )
 
@@ -304,14 +303,14 @@ def fusion2free(data_id, fusion_json):
 
 
 if __name__ == "__main__":
-    from fusion2free.utils.config import INPUT_DIR
+    from deepcad2free.utils.config import INPUT_DIR
 
     # Quick test: convert a single model
     test_path = os.path.join(INPUT_DIR, "0000/00000007.json")
     if os.path.exists(test_path):
-        fusion_json = load_fusion(test_path)
+        deepcad_json = load_deepcad(test_path)
         data_id = "00000007"
-        free_str, _, _ = fusion2free(data_id, fusion_json)
+        free_str, _, _ = deepcad2free(data_id, deepcad_json)
         print(free_str)
     else:
         print(f"Test file not found: {test_path}")

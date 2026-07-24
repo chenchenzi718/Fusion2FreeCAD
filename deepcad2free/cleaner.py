@@ -1,5 +1,5 @@
 """
-Fusion 360 JSON cleaner -- repairs issues in Fusion 360 JSON data.
+DeepCAD JSON cleaner -- repairs issues in DeepCAD JSON data.
 
 Removes:
   1. UNUSED SKETCH -- sketches not referenced by any ExtrudeFeature
@@ -14,21 +14,21 @@ import os
 
 from tqdm import tqdm
 
-from fusion2free.utils.load_fusion import load_fusion
+from deepcad2free.utils.load_deepcad import load_deepcad
 
 
-def repair_fusion(fusion_json):
+def repair_deepcad(deepcad_json):
     """
-    Repair a Fusion 360 JSON model by removing problematic entities.
+    Repair a DeepCAD JSON model by removing problematic entities.
 
     Args:
-        fusion_json: parsed Fusion 360 JSON dict
+        deepcad_json: parsed DeepCAD JSON dict
 
     Returns:
-        Repaired Fusion 360 JSON dict
+        Repaired DeepCAD JSON dict
     """
-    seq_list = fusion_json.get("sequence", [])
-    entry_dict = fusion_json.get("entities", {})
+    seq_list = deepcad_json.get("sequence", [])
+    entry_dict = deepcad_json.get("entities", {})
 
     used_sketches = set()
     entities_to_remove = set()
@@ -75,22 +75,22 @@ def repair_fusion(fusion_json):
     for new_idx, op_info in enumerate(seq_list):
         op_info["index"] = new_idx
 
-    fusion_json["sequence"] = seq_list
-    fusion_json["entities"] = entry_dict
+    deepcad_json["sequence"] = seq_list
+    deepcad_json["entities"] = entry_dict
 
-    return fusion_json
+    return deepcad_json
 
 
 if __name__ == "__main__":
-    from fusion2free.utils.config import INPUT_DIR, REPAIR_DIR
+    from deepcad2free.utils.config import INPUT_DIR, REPAIR_DIR
 
     # Quick test: clean a single model
     test_path = os.path.join(INPUT_DIR, "0000/00000007.json")
     if os.path.exists(test_path):
         save_path = os.path.join(REPAIR_DIR, "0000/00000007.json")
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        fusion_json = load_fusion(test_path)
-        repaired = repair_fusion(fusion_json)
+        deepcad_json = load_deepcad(test_path)
+        repaired = repair_deepcad(deepcad_json)
         with open(save_path, "w") as f:
             json.dump(repaired, f, indent=4)
         print(f"Saved: {save_path}")

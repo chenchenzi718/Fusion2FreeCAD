@@ -1,5 +1,5 @@
 """
-FreeCAD name encoder -- maps Fusion 360 entity IDs to FreeCAD-safe names.
+FreeCAD name encoder -- maps DeepCAD entity IDs to FreeCAD-safe names.
 
 Uses SHA-256 hashing to produce 24-character uppercase alphanumeric strings,
 with SQLite persistence for deduplication.
@@ -11,7 +11,7 @@ import string
 
 
 class FreeCADNameEncoder:
-    """Encode Fusion 360 entity names to FreeCAD-safe identifiers."""
+    """Encode DeepCAD entity names to FreeCAD-safe identifiers."""
 
     def __init__(self, db_path="name_mapping.db"):
         self.db_path = db_path
@@ -77,7 +77,7 @@ class FreeCADNameEncoder:
                 if attempt > max_attempts:
                     raise Exception("Cannot generate unique encoded name.")
 
-    def decode_name_fusion2free(self, original_name):
+    def decode_name_deepcad2free(self, original_name):
         """
         Look up the encoded name for an original name.
         Returns None if not found in DB yet.
@@ -98,7 +98,7 @@ class FreeCADNameEncoder:
             encoded_mapping[name] = self.encode_name(name)
         return encoded_mapping
 
-    def decode_names_bulk_free2fusion(self, encoded_names):
+    def decode_names_bulk_free2deepcad(self, encoded_names):
         """Bulk decode: returns {encoded: original} dict."""
         placeholders = ",".join("?" for _ in encoded_names)
         query = (
@@ -109,7 +109,7 @@ class FreeCADNameEncoder:
         results = self.cursor.fetchall()
         return {encoded: original for encoded, original in results}
 
-    def decode_names_bulk_fusion2free(self, encoded_names):
+    def decode_names_bulk_deepcad2free(self, encoded_names):
         """Bulk decode: returns {encoded: original} dict."""
         placeholders = ",".join("?" for _ in encoded_names)
         query = (
@@ -143,12 +143,12 @@ class FreeCADNameEncoder:
                 original = row["Original Name"]
                 encoded = row["Encoded Name"]
                 try:
-                    if direction == "fusion2free":
+                    if direction == "deepcad2free":
                         self.cursor.execute(
                             "INSERT INTO name_mapping (original_name, encoded_name) VALUES (?, ?)",
                             (original, encoded),
                         )
-                    elif direction == "free2fusion":
+                    elif direction == "free2deepcad":
                         self.cursor.execute(
                             "INSERT INTO name_mapping (original_name, encoded_name) VALUES (?, ?)",
                             (encoded, original),

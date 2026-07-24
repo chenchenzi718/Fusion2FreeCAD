@@ -1,5 +1,5 @@
 """
-Configuration and constants for Fusion2Free.
+Configuration for exp_tools -- experiment utilities for parametric CAD models.
 
 All user-facing paths and defaults are centralized here. Override any value
 via environment variable or by editing this file directly.
@@ -8,7 +8,7 @@ via environment variable or by editing this file directly.
 import os
 
 # ---------------------------------------------------------------------------
-# FreeCAD command-line path (required for validation & bbox)
+# FreeCAD command-line path (required for running experiments)
 # ---------------------------------------------------------------------------
 FREECAD_CMD_PATH = os.environ.get(
     "FREECAD_CMD",
@@ -16,28 +16,27 @@ FREECAD_CMD_PATH = os.environ.get(
 )
 
 # ---------------------------------------------------------------------------
-# Directory paths (relative to project root; can be absolute)
+# Dataset path -- directory containing *_free.py model scripts
 # ---------------------------------------------------------------------------
-INPUT_DIR      = "data/cad_json"        # Raw Fusion 360 JSON
-REPAIR_DIR     = "data/cad_json_repair" # Cleaned JSON
-OUTPUT_PY_DIR  = "data/cad_py_repair"   # Generated FreeCAD .py scripts
-OUTPUT_FREE_DIR = "data/cad_free_repair" # Validated .FCStd files
-LOG_DIR        = "logging"              # Log files & SQLite database
+DATASET_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "exp_tools", "dataset",
+)
 
 # ---------------------------------------------------------------------------
-# Database paths
+# Output path -- where experiment results are written
 # ---------------------------------------------------------------------------
-DB_PATH       = os.path.join(LOG_DIR, "log.db")
-NAME_DB_PATH  = "utils/name_mapping.db"
+OUTPUT_DIR = "exp_output"
+
+# ---------------------------------------------------------------------------
+# Experiment parameters
+# ---------------------------------------------------------------------------
+SCALE_MIN = 0.1       # Lower bound for random scale factor
+SCALE_MAX = 0.9       # Upper bound for random scale factor
+NUM_SCALES = 5        # Number of random scales per feature
+RANDOM_SEED = 42      # Random seed for reproducibility
 
 # ---------------------------------------------------------------------------
 # Processing defaults
 # ---------------------------------------------------------------------------
-DEFAULT_PROCESSES = 8     # Max worker processes (actual: min(cpu-1, this))
-DEFAULT_BATCH_SIZE = 50   # DB flush interval
-
-# ---------------------------------------------------------------------------
-# Script generation constants
-# ---------------------------------------------------------------------------
-EOL       = "\n"
-RECOMPUTE = f"App.ActiveDocument.recompute(){EOL}"
+DEFAULT_PROCESSES = 1  # exp_tools runs sequentially by default (FreeCAD license)

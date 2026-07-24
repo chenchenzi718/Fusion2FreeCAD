@@ -9,7 +9,7 @@ import os
 import subprocess
 import tempfile
 
-from fusion2free.utils.config import FREECAD_CMD_PATH
+from deepcad2free.utils.config import FREECAD_CMD_PATH
 
 
 def _clean_env():
@@ -125,7 +125,7 @@ except Exception:
 
 
 if __name__ == "__main__":
-    from fusion2free.utils.config import OUTPUT_PY_DIR, LOG_DIR, OUTPUT_FREE_DIR
+    from deepcad2free.utils.config import OUTPUT_PY_DIR, LOG_DIR, OUTPUT_FREE_DIR
 
     run_freecad_modeling(
         "00000007",
