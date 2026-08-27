@@ -76,7 +76,22 @@ python -m deepcad2free.main \
     --verbose
 ```
 
-For pipeline details and module-level API documentation, see [deepcad2free/README.md](deepcad2free/README.md).
+#### Pipeline
+
+```
+DeepCAD JSON ──→ Clean ──→ Convert ──→ Validate ──→ BBox ──→ DeepCAD JSON (updated)
+                  │           │           │            │
+               repair      .py script   FreeCAD     bbox written
+               entities   per model     Cmd exec    back to JSON
+```
+
+#### Supported Operations
+
+| DeepCAD | FreeCAD |
+|---|---|
+| Sketch (Line3D, Arc3D, Circle3D) | Sketcher::SketchObject |
+| Extrude → NewBody / Join | PartDesign::Pad |
+| Extrude → Cut | PartDesign::Pocket |
 
 ### Experiment Tools
 

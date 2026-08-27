@@ -18,22 +18,6 @@ Each model goes through four sequential steps:
 
 Status for every model is tracked in a SQLite database (`log/log.db`) and exported to CSV.
 
-## Modules
-
-| File | Role |
-|------|------|
-| `main.py` | Unified entry point. Orchestrates the pipeline, handles CLI arguments, multiprocess worker dispatch, and colored logging. |
-| `converter.py` | Core conversion engine. Translates DeepCAD JSON entities (Sketch, ExtrudeFeature) into FreeCAD Python code. |
-| `cleaner.py` | Data repair module. Strips problematic entities and re-indexes sequences. |
-| `utils/config.py` | Centralized configuration — paths, defaults, environment variable overrides. |
-| `utils/load_deepcad.py` | JSON loader and operation sequence string extraction (`SNSCSCSC`). |
-| `utils/free_operation.py` | FreeCAD API code generators — `free_make_new_doc`, `free_make_new_sketch`, `free_make_extrude`, etc. |
-| `utils/free_check.py` | Validation via `FreeCADCmd` subprocess. Spins up a clean environment, executes the script, saves `.FCStd`. |
-| `utils/get_free_bbox.py` | Bounding box extraction from `.FCStd` via `FreeCADCmd` subprocess, writes bbox back to JSON. |
-| `utils/naming_utils.py` | SHA-256-based entity name encoder with SQLite persistence, ensures FreeCAD-safe identifiers. |
-| `utils/logging_db.py` | SQLite database for per-model status tracking (convert/validate/bbox success, error codes). |
-| `utils/cad_filter.py` | Standalone tool — filter models by operation sequence length. |
-
 ## Supported Operations
 
 | DeepCAD | FreeCAD |
