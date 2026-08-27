@@ -43,7 +43,7 @@ FREECAD_CMD_PATH = os.environ.get(
 
 ### 3. Download the DeepCAD dataset
 
-Download `cad_json` from the [DeepCAD repository](https://github.com/rundiwu/DeepCAD) and place it at `data/cad_json/` (the default input directory).
+Download `cad_json` from the [DeepCAD repository](https://github.com/rundiwu/DeepCAD) and place it at `data/cad_json/` (the default input directory). Then download `train_val_test_split.json` and place it at `data/`
 
 Or change the default in `deepcad2free/utils/config.py`:
 
