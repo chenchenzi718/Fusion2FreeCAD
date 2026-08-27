@@ -30,7 +30,7 @@ FREECAD_CMD_PATH = r"C:\your\path\to\FreeCAD\bin\FreeCADCmd.exe"
 
 ### 3. Download the DeepCAD dataset
 
-Download `cad_json` from the [DeepCAD repository](https://github.com/rundiwu/DeepCAD) and place it at `deepcad2free/data/cad_json/` (the default input directory). Then download `train_val_test_split.json` and place it at `data/`
+Download `cad_json` from the [DeepCAD repository](https://github.com/rundiwu/DeepCAD) and place it at `deepcad2free/data/cad_json/` (the default input directory). Then download `train_val_test_split.json` and place it at `deepcad2free/data/`
 
 Or change the default in `deepcad2free/utils/config.py`:
 
@@ -80,7 +80,7 @@ The `exp_tools/` directory contains utilities for running parameter modification
 
 #### Run All Experiments
 
-For each model in the dataset, scan features and modify each by random scale factors:
+For each model in the `exp_tools/dataset`, scan features and modify each by random scale factors:
 
 ```bash
 # Default: 5 random scales per feature in [0.1, 1.9], seed=42
