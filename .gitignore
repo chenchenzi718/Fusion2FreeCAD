@@ -52,6 +52,3 @@ ehthumbs.db
 # Pickle datasets (too large for git)
 *.pkl
 *.pickle
-
-# Auxiliary materials (not part of release)
-aux_material/

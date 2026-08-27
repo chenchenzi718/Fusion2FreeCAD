@@ -43,7 +43,7 @@ FREECAD_CMD_PATH = os.environ.get(
 
 ### 3. Download the DeepCAD dataset
 
-Download `cad_json` from the [DeepCAD repository](https://github.com/liruilong940607/DeepCAD) and place it at `data/cad_json/` (the default input directory).
+Download `cad_json` from the [DeepCAD repository](https://github.com/rundiwu/DeepCAD) and place it at `data/cad_json/` (the default input directory).
 
 Or change the default in `deepcad2free/utils/config.py`:
 
@@ -161,5 +161,5 @@ If you use this project in your research, please cite:
 
 ## References
 
-- [DeepCAD Dataset](https://github.com/liruilong940607/DeepCAD)
+- [DeepCAD Dataset](https://github.com/rundiwu/DeepCAD)
 - [FreeCAD](https://www.freecad.org/)

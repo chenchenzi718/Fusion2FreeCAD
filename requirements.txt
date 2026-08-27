@@ -5,6 +5,3 @@ pandas>=2.0.3
 python-dateutil>=2.9.0
 pytz>=2024.2
 tqdm>=4.67.1
-
-# Optional -- required for exp_tools Excel analysis (not included in this release)
-# openpyxl>=3.1.0
