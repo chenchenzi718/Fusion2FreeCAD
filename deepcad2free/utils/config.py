@@ -10,25 +10,22 @@ import os
 # ---------------------------------------------------------------------------
 # FreeCAD command-line path (required for validation & bbox)
 # ---------------------------------------------------------------------------
-FREECAD_CMD_PATH = os.environ.get(
-    "FREECAD_CMD",
-    r"D:\path\to\FreeCAD\bin\FreeCADCmd.exe",
-)
+FREECAD_CMD_PATH = r"D:\path\to\FreeCAD\bin\FreeCADCmd.exe"
 
 # ---------------------------------------------------------------------------
 # Directory paths (relative to project root; can be absolute)
 # ---------------------------------------------------------------------------
-INPUT_DIR      = "data/cad_json"        # Raw DeepCAD JSON
-REPAIR_DIR     = "data/cad_json_repair" # Cleaned JSON
-OUTPUT_PY_DIR  = "data/cad_py_repair"   # Generated FreeCAD .py scripts
-OUTPUT_FREE_DIR = "data/cad_free_repair" # Validated .FCStd files
-LOG_DIR        = "logging"              # Log files & SQLite database
+INPUT_DIR      = "deepcad2free/data/cad_json"        # Raw DeepCAD JSON
+REPAIR_DIR     = "deepcad2free/data/cad_json_repair" # Cleaned JSON
+OUTPUT_PY_DIR  = "deepcad2free/data/cad_py_repair"   # Generated FreeCAD .py scripts
+OUTPUT_FREE_DIR = "deepcad2free/data/cad_free_repair" # Validated .FCStd files
+LOG_DIR        = "deepcad2free/logging"              # Log files & SQLite database
 
 # ---------------------------------------------------------------------------
 # Database paths
 # ---------------------------------------------------------------------------
 DB_PATH       = os.path.join(LOG_DIR, "log.db")
-NAME_DB_PATH  = "utils/name_mapping.db"
+NAME_DB_PATH  = "deepcad2free/utils/name_mapping.db"
 
 # ---------------------------------------------------------------------------
 # Processing defaults

@@ -12,9 +12,6 @@ logging/
 *.log
 *.csv
 
-# SQLite databases (runtime artifacts)
-*.db
-
 # Python cache
 __pycache__/
 *.pyc

@@ -22,34 +22,24 @@ pip install -r requirements.txt
 
 ### 2. Configure FreeCAD path
 
-Set `FREECAD_CMD` to point to the FreeCAD command-line executable:
-
-```bash
-# Windows
-set FREECAD_CMD=C:\path\to\FreeCAD\bin\FreeCADCmd.exe
-
-# Linux / macOS
-export FREECAD_CMD=/usr/bin/freecadcmd
-```
-
-Or edit `deepcad2free/utils/config.py` directly:
+Edit `deepcad2free/utils/config.py` and `exp_tools\config.py`:
 
 ```python
-FREECAD_CMD_PATH = os.environ.get(
-    "FREECAD_CMD",
-    r"C:\your\path\to\FreeCAD\bin\FreeCADCmd.exe",
-)
+FREECAD_CMD_PATH = r"C:\your\path\to\FreeCAD\bin\FreeCADCmd.exe"
 ```
 
 ### 3. Download the DeepCAD dataset
 
-Download `cad_json` from the [DeepCAD repository](https://github.com/rundiwu/DeepCAD) and place it at `data/cad_json/` (the default input directory). Then download `train_val_test_split.json` and place it at `data/`
+Download `cad_json` from the [DeepCAD repository](https://github.com/rundiwu/DeepCAD) and place it at `deepcad2free/data/cad_json/` (the default input directory). Then download `train_val_test_split.json` and place it at `data/`
 
 Or change the default in `deepcad2free/utils/config.py`:
 
 ```python
-INPUT_DIR  = "path/to/your/cad_json"
-REPAIR_DIR = "path/to/your/cad_json_repair"
+INPUT_DIR      = "deepcad2free/data/cad_json"        # Raw DeepCAD JSON
+REPAIR_DIR     = "deepcad2free/data/cad_json_repair" # Cleaned JSON
+OUTPUT_PY_DIR  = "deepcad2free/data/cad_py_repair"   # Generated FreeCAD .py scripts
+OUTPUT_FREE_DIR = "deepcad2free/data/cad_free_repair" # Validated .FCStd files
+LOG_DIR        = "deepcad2free/logging"              # Log files & SQLite database
 ```
 
 ## Usage

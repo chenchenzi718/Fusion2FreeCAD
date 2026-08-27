@@ -10,10 +10,7 @@ import os
 # ---------------------------------------------------------------------------
 # FreeCAD command-line path (required for running experiments)
 # ---------------------------------------------------------------------------
-FREECAD_CMD_PATH = os.environ.get(
-    "FREECAD_CMD",
-    r"D:\path\to\FreeCAD\bin\FreeCADCmd.exe",
-)
+FREECAD_CMD_PATH = r"D:\path\to\FreeCAD\bin\FreeCADCmd.exe"
 
 # ---------------------------------------------------------------------------
 # Dataset path -- directory containing *_free.py model scripts
