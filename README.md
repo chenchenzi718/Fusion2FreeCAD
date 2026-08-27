@@ -116,13 +116,30 @@ FreeCADCmd.exe exp_tools/modifier/test_model.py model.py scan
 FreeCADCmd.exe exp_tools/modifier/test_model.py model.py test 2 1.5
 ```
 
-See [exp_tools/README.md](exp_tools/README.md) for more details.
+#### Output Structure
+
+```
+exp_output/
+├── experiment.log           # Overall run log
+├── summary.csv              # Per-experiment summary (success/fail)
+├── 00039419/                # Model output directory
+│   ├── scan_all.json        # Feature scan result (JSON)
+│   ├── scan_all.log         # FreeCAD scan output
+│   └── feature_0/           # Per-feature directory
+│       ├── scale_0.3456/    # Per-scale experiment
+│       │   ├── experiment.log
+│       │   ├── original.brep
+│       │   └── modified.brep
+│       ├── scale_0.7821/
+│       │   └── ...
+│       └── ...
+├── 00040108/
+│   └── ...
+```
 
 ## Dataset
 
 The `exp_tools/dataset/` directory contains the **424 curated FreeCAD Python scripts** used in the paper, converted from DeepCAD and validated for experimental use. Each script recreates a parametric CAD model when executed inside FreeCAD.
-
-See [exp_tools/dataset/dataset_info.md](exp_tools/dataset/dataset_info.md) for details.
 
 ## License
 
