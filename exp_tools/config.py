@@ -32,7 +32,7 @@ OUTPUT_DIR = "exp_output"
 # Experiment parameters
 # ---------------------------------------------------------------------------
 SCALE_MIN = 0.1       # Lower bound for random scale factor
-SCALE_MAX = 0.9       # Upper bound for random scale factor
+SCALE_MAX = 1.9       # Upper bound for random scale factor
 NUM_SCALES = 5        # Number of random scales per feature
 RANDOM_SEED = 42      # Random seed for reproducibility
 

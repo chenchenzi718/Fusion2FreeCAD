@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains **425 curated FreeCAD Python scripts** that have been converted from the DeepCAD dataset and validated for use in parametric CAD model modification experiments.
+This directory contains **424 curated FreeCAD Python scripts** that have been converted from the DeepCAD dataset and validated for use in parametric CAD model modification experiments.
 
 Each `.py` file is a self-contained FreeCAD script that:
 1. Creates a new FreeCAD document
@@ -35,17 +35,3 @@ FreeCADCmd.exe exp_tools/modifier/test_model.py model_file.py test <feature_idx>
 ```
 
 See the [exp_tools README](../README.md) for detailed instructions.
-
-## Filtering Criteria
-
-The models in this dataset were selected through a multi-stage filtering process:
-- Successfully converted from DeepCAD JSON to FreeCAD Python
-- Successfully rebuilt in FreeCAD (no errors during script execution)
-- Contain at least one modifiable Pad or Pocket feature
-- Filtered for structural diversity (varying operation sequence lengths and types)
-
-## Limitations
-
-- Models only contain Sketch + Extrude (Pad/Pocket) operations
-- Intersect operations are not supported
-- Some models may fail when parameters are modified beyond a reasonable range

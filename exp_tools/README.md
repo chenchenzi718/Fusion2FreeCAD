@@ -12,7 +12,7 @@ exp_tools/
 │   ├── test_model.py        # Load .py scripts, scan or modify features
 │   ├── feature_modifier.py  # Modify features in .FCStd files directly
 │   └── gradient_gen.py      # Gradient scale generator & CSV helpers
-└── dataset/                 # ~425 validated FreeCAD Python scripts
+└── dataset/                 # 424 validated FreeCAD Python scripts
 ```
 
 ## Quick Start
@@ -38,7 +38,7 @@ python -m exp_tools.main \
     --output-dir exp_output \
     --scales 5 \
     --scale-min 0.1 \
-    --scale-max 0.9 \
+    --scale-max 1.9 \
     --seed 42 \
     --verbose
 ```

@@ -2,9 +2,15 @@
 
 **DeepCAD2Free** converts DeepCAD parametric CAD models into FreeCAD Python scripts, and provides tools for modifying model parameters in experiments.
 
+This repository is the public code release of the SIGGRAPH Asia 2026 project *Validity-Assured Regeneration of Parametric Solid Modeling*; see the [project page](https://mechano-pesudo.github.io/Validity_Assured_Fast_Regeneration_of_Parametric_Solid_Modeling/) for details. Please note:
+
+1. This repository is **not** the complete code used in the paper. During the experiments, we embedded our algorithm into the open-source CAD system FreeCAD and compiled a custom FreeCAD build. For various reasons, we cannot release this custom build, and the scripts used to collect and analyze the experimental data (the VAR and FBR timings, etc.) are therefore not included here. The main functionality of this repository is to convert the DeepCAD JSON scripts into Python scripts executable by FreeCAD, and its functionality is so far limited. We release it to provide a possible starting point for related community research.
+
+2. The project uses 424 models in Python form, far fewer than the original DeepCAD dataset, because we filtered the models: not all of them are suitable for our study. The filtering criteria are described in detail on the project page and in the supplementary material. All 424 models are released together in [`exp_tools/dataset/`](exp_tools/dataset/).
+
 ## Prerequisites
 
-- **FreeCAD 1.0.1** — our experiments use a custom build forked from the official 1.0.1 branch. Other branches or release versions may have API compatibility issues.
+- **FreeCAD 1.0.1** — our experiments use a custom build forked from the official 0.22.0 dev branch; of the official releases, 1.0.1 is the closest to it. Other branches or release versions may have API compatibility issues.
 
 ## Setup
 
@@ -81,14 +87,14 @@ The `exp_tools/` directory contains utilities for running parameter modification
 For each model in the dataset, scan features and modify each by random scale factors:
 
 ```bash
-# Default: 5 random scales per feature in [0.1, 0.9], seed=42
+# Default: 5 random scales per feature in [0.1, 1.9], seed=42
 python -m exp_tools.main
 
 # Custom parameters
 python -m exp_tools.main \
     --dataset-dir exp_tools/dataset \
     --output-dir exp_output \
-    --scales 5 --scale-min 0.1 --scale-max 0.9 \
+    --scales 5 --scale-min 0.1 --scale-max 1.9 \
     --seed 42 --verbose
 ```
 
@@ -108,7 +114,7 @@ See [exp_tools/README.md](exp_tools/README.md) for more details.
 
 ## Dataset
 
-The `exp_tools/dataset/` directory contains **425 curated FreeCAD Python scripts** that have been converted from DeepCAD and validated for experimental use. Each script recreates a parametric CAD model when executed inside FreeCAD.
+The `exp_tools/dataset/` directory contains the **424 curated FreeCAD Python scripts** used in the paper, converted from DeepCAD and validated for experimental use. Each script recreates a parametric CAD model when executed inside FreeCAD.
 
 See [exp_tools/dataset/dataset_info.md](exp_tools/dataset/dataset_info.md) for details.
 
@@ -121,11 +127,12 @@ MIT License. See [LICENSE](LICENSE).
 If you use this project in your research, please cite:
 
 ```bibtex
-@inproceedings{deepcad2free,
-  author  = {TODO},
-  title   = {Validity-Assured Fast Regeneration of Parametric Solid Modeling},
-  booktitle = {TODO},
-  year    = {2026}
+@inproceedings{chen2026validityassured,
+  author  = {Chen, Zehao and Zheng, Zihe and Lu, Yang and Feng, Yushan and Li, Jialin and Chen, Cong and Liu, Ligang},
+  title   = {Validity-Assured Regeneration of Parametric Solid Modeling},
+  booktitle = {SIGGRAPH Asia},
+  year    = {2026},
+  doi     = {10.1145/3829340.3842251}
 }
 ```
 
