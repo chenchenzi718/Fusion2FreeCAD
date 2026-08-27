@@ -76,15 +76,6 @@ python -m deepcad2free.main \
     --verbose
 ```
 
-#### Pipeline
-
-```
-DeepCAD JSON ──→ Clean ──→ Convert ──→ Validate ──→ BBox ──→ DeepCAD JSON (updated)
-                  │           │           │            │
-               repair      .py script   FreeCAD     bbox written
-               entities   per model     Cmd exec    back to JSON
-```
-
 #### Supported Operations
 
 | DeepCAD | FreeCAD |
