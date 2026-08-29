@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 ### 2. Configure FreeCAD path
 
-Edit `deepcad2free/utils/config.py` and `exp_tools\config.py`:
+Edit `deepcad2free/utils/config.py` and `exp_tools/config.py`:
 
 ```python
 FREECAD_CMD_PATH = r"C:\your\path\to\FreeCAD\bin\FreeCADCmd.exe"
