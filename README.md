@@ -96,16 +96,6 @@ python -m exp_tools.main \
 
 Results are written to `--output-dir` with a `summary.csv` and per-model output folders.
 
-#### Single-Model Tools
-
-```bash
-# Scan all features of a model
-FreeCADCmd.exe exp_tools/modifier/test_model.py model.py scan
-
-# Modify feature 2 with 1.5x scale
-FreeCADCmd.exe exp_tools/modifier/test_model.py model.py test 2 1.5
-```
-
 #### Output Structure
 
 ```
