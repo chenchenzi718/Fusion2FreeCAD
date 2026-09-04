@@ -2,7 +2,7 @@
 
 **DeepCAD2Free** converts DeepCAD parametric CAD models into FreeCAD Python scripts, and provides tools for modifying model parameters in experiments.
 
-This repository is the public code release of the SIGGRAPH Asia 2026 project *Validity-Assured Regeneration of Parametric Solid Modeling*; see the [project page](https://mechano-pesudo.github.io/Validity_Assured_Fast_Regeneration_of_Parametric_Solid_Modeling/) for details. Please note:
+This repository is the public code release of the SIGGRAPH Asia 2026 project *Validity-Assured Regeneration of Parametric Solid Modeling*; see the [project page](https://mechano-pesudo.github.io/VAR/) for details. Please note:
 
 1. This repository is **not** the complete code used in the paper. During the experiments, we embedded our algorithm into the open-source CAD system FreeCAD and compiled a custom FreeCAD build. For various reasons, we cannot release this custom build, and the scripts used to collect and analyze the experimental data (the VAR and FBR timings, etc.) are therefore not included here. The main functionality of this repository is to convert the DeepCAD JSON scripts into Python scripts executable by FreeCAD, and its functionality is so far limited. We release it to provide a possible starting point for related community research.
 
